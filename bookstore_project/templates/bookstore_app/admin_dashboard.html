@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load currency_filters %}
+
+{% block title %}Bảng điều khiển quản lý{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="page-title">
+        <i class="fas fa-tachometer-alt"></i> Bảng điều khiển
+    </h1>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-primary">{{ total_books }}</h2>
+                    <p class="card-text">Tổng sách</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-success">{{ total_users }}</h2>
+                    <p class="card-text">Người dùng</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-info">{{ total_orders }}</h2>
+                    <p class="card-text">Đơn hàng</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-warning">{{ total_revenue|vnd }}</h2>
+                    <p class="card-text">Doanh thu</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Đơn hàng theo trạng thái</h5>
+                </div>
+                <div class="card-body">
+                    {% for status_data in orders_by_status %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>{{ status_data.label }}</span>
+                        <strong>{{ status_data.count }}</strong>
+                    </div>
+                    {% empty %}
+                    <div class="text-muted">Chưa có dữ liệu đơn hàng.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Sách bán chạy nhất</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Tên sách</th>
+                                <th>Bán</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in top_books %}
+                            <tr>
+                                <td>{{ book.title }}</td>
+                                <td><strong>{{ book.sales }}</strong></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">Chưa có dữ liệu</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Management Links -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Quản lý</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'manage_books' %}" class="btn btn-primary">
+                        <i class="fas fa-book"></i> Quản lý sách
+                    </a>
+                    <a href="{% url 'admin_orders' %}" class="btn btn-info text-white">
+                        <i class="fas fa-shopping-cart"></i> Quản lý đơn hàng
+                    </a>
+                    <a href="/admin/" class="btn btn-secondary">
+                        <i class="fas fa-cog"></i> Quản lý Django
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const formatCurrency = (value) => {
+            const number = Number(value || 0);
+            return `${number.toLocaleString('vi-VN')} đ`;
+        };
+
+        const revenueLabels = [{% for item in revenue_by_date %}"{{ item.date|date:'d/m' }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+        const revenueValues = [{% for item in revenue_by_date %}{{ item.revenue|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+
+        const statusLabels = [{% for item in orders_by_status %}"{{ item.label }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+        const statusValues = [{% for item in orders_by_status %}{{ item.count }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+
+        const revenueCanvas = document.getElementById('revenueChart');
+        if (revenueCanvas && revenueLabels.length) {
+            new Chart(revenueCanvas, {
+                type: 'bar',
+                data: {
+                    labels: revenueLabels,
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: revenueValues,
+                        borderColor: '#1d4ed8',
+                        backgroundColor: 'rgba(29, 78, 216, 0.78)',
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => ` ${formatCurrency(context.parsed.y)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => formatCurrency(value)
+                            }
+                        }
+                    }
+                }
+            });
+        } else if (revenueCanvas) {
+            revenueCanvas.parentElement.innerHTML = '<div class="alert alert-light border mb-0">Chưa có dữ liệu doanh thu để hiển thị biểu đồ.</div>';
+        }
+
+        const statusCanvas = document.getElementById('orderStatusChart');
+        if (statusCanvas && statusLabels.length) {
+            new Chart(statusCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusValues,
+                        backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6', '#64748b', '#16a34a', '#dc2626', '#6b7280']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 8
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const total = statusValues.reduce((sum, value) => sum + value, 0);
+                                    const percent = total ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                    return ` ${context.label}: ${context.parsed} đơn (${percent}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else if (statusCanvas) {
+            statusCanvas.parentElement.innerHTML = '<div class="alert alert-light border mb-0">Chưa có dữ liệu trạng thái đơn hàng.</div>';
+        }
+    });
+</script>
+{% endblock %}

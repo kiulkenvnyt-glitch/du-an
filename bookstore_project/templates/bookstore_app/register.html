@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Đăng ký{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-wrap {
+        max-width: 620px;
+        margin: 56px auto;
+    }
+    .auth-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 18px 46px rgba(16, 32, 63, 0.12);
+        overflow: hidden;
+    }
+    .auth-header {
+        background: linear-gradient(135deg, #10203f, #183764);
+        color: #fff;
+        padding: 1.2rem 1.5rem;
+    }
+    .auth-subtitle {
+        color: #6d7d99;
+        margin-bottom: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container auth-wrap">
+    <div class="card auth-card">
+        <div class="auth-header text-center">
+            <h3 class="mb-1">Tạo tài khoản mới</h3>
+            <small>Đăng ký nhanh để lưu đơn hàng và danh sách yêu thích</small>
+        </div>
+        <div class="card-body">
+            <p class="auth-subtitle">Điền đầy đủ thông tin bên dưới để bắt đầu.</p>
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-user-plus"></i> Tạo tài khoản
+                </button>
+            </form>
+            
+            <p class="text-center mt-3">
+                Đã có tài khoản? <a href="{% url 'login' %}">Đăng nhập ngay</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

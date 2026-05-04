@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}Quản trị BookStore{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div class="brand-wrap">
+    <h1 id="site-name">
+        <a href="{% url 'admin:index' %}">
+            <span class="brand-badge">BS</span>
+            Quản trị BookStore
+        </a>
+    </h1>
+    <p class="brand-subtitle">Hệ thống quản lý cửa hàng sách</p>
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

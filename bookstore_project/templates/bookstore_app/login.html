@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Đăng nhập{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-wrap {
+        max-width: 520px;
+        margin: 56px auto;
+    }
+    .auth-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 18px 46px rgba(16, 32, 63, 0.12);
+        overflow: hidden;
+    }
+    .auth-header {
+        background: linear-gradient(135deg, #10203f, #183764);
+        color: #fff;
+        padding: 1.2rem 1.5rem;
+    }
+    .auth-subtitle {
+        color: #6d7d99;
+        margin-bottom: 1.4rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container auth-wrap">
+    <div class="card auth-card">
+        <div class="auth-header text-center">
+            <h3 class="mb-1">Đăng nhập tài khoản</h3>
+            <small>Tiếp tục mua sắm và theo dõi đơn hàng của bạn</small>
+        </div>
+        <div class="card-body">
+            <p class="auth-subtitle">Vui lòng nhập thông tin đăng nhập.</p>
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="username" class="form-label">Tên đăng nhập</label>
+                    <input type="text" class="form-control" id="username" name="username" required autocomplete="username" placeholder="Nhập tên đăng nhập">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Mật khẩu</label>
+                    <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password" placeholder="Nhập mật khẩu">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </button>
+            </form>
+            
+            <p class="text-center mt-3">
+                Chưa có tài khoản? <a href="{% url 'register' %}">Đăng ký tại đây</a>
+            </p>
+            
+            <p class="text-center">
+                <a href="{% url 'password_reset' %}">Quên mật khẩu?</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

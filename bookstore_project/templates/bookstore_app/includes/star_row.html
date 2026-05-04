@@ -1,0 +1,11 @@
+<span class="star-row star-row--{{ size }}" role="img" aria-label="{% if max_stars == 5 %}{{ rating }} trên 5 sao{% else %}{{ rating }} sao{% endif %}">
+    {% for _ in full_range %}
+    <i class="fas fa-star star-row__i star--on" aria-hidden="true"></i>
+    {% endfor %}
+    {% if half %}
+    <i class="fas fa-star-half-alt star-row__i star--half" aria-hidden="true"></i>
+    {% endif %}
+    {% for _ in empty_range %}
+    <i class="far fa-star star-row__i star--off" aria-hidden="true"></i>
+    {% endfor %}
+</span>

@@ -1,0 +1,28 @@
+{% extends "admin/change_list.html" %}
+{% block extrahead %}{{ block.super }}
+<script>
+(function () {
+  function mergeCartItemToolbar() {
+    var main = document.getElementById("content-main");
+    var form = document.getElementById("changelist-form");
+    if (!main || !form) return;
+    var tools = main.querySelector(":scope > ul.object-tools");
+    var actions = form.querySelector(".actions");
+    if (!tools || !actions || tools.dataset.cartitemMerged === "1") return;
+    tools.dataset.cartitemMerged = "1";
+    var bar = document.createElement("div");
+    bar.className = "cartitem-changelist-toolbar";
+    bar.style.cssText =
+      "display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:12px;margin:0 0 12px 0;width:100%;";
+    actions.parentNode.insertBefore(bar, actions);
+    bar.appendChild(actions);
+    bar.appendChild(tools);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mergeCartItemToolbar);
+  } else {
+    mergeCartItemToolbar();
+  }
+})();
+</script>
+{% endblock %}

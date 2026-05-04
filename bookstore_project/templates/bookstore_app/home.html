@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% load currency_filters star_tags %}
+
+{% block title %}Trang chủ{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center gy-5">
+            <div class="col-lg-6 fade-slide">
+                <span class="badge-highlight">Thư viện sách trực tuyến</span>
+                <h1>BookStore - Nơi sách hay tìm đến bạn</h1>
+                <p>Khám phá tuyển tập sách best seller, kinh điển và mới nhất với trải nghiệm mua sắm nhanh, hiện đại và thân thiện.</p>
+                <div class="d-flex flex-column flex-sm-row gap-3 mt-4">
+                    <a href="{% url 'book_list' %}" class="btn btn-warning btn-lg hero-cta">Khám phá sách</a>
+                    <a href="{% url 'book_list' %}" class="btn btn-outline-light btn-lg hero-cta">Bộ sưu tập mới</a>
+                </div>
+                <div class="d-flex flex-wrap gap-3 mt-4 text-white-50">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge badge-highlight">+2.000</span>
+                        Sách mới mỗi tháng
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge badge-highlight">4.9/5</span>
+                        Đánh giá tin cậy
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 hero-visual fade-slide">
+                <div class="hero-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <span class="badge-highlight">Bộ sưu tập</span>
+                            <h4 class="mt-3 mb-0">Sách bán chạy nhất</h4>
+                        </div>
+                        <div class="text-end text-white-50">
+                            <span>Giảm đến 40%</span>
+                        </div>
+                    </div>
+                    <div class="book-stack">
+                        {% for book in hero_books %}
+                        <a href="{% url 'book_detail' book.slug %}" class="book-item hero-book-link">
+                            {% if book.cover_image %}
+                            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="book-cover-thumb">
+                            {% else %}
+                            <div class="book-cover-thumb d-flex align-items-center justify-content-center" style="background-color: #f0f0f0;">
+                                <i class="fas fa-book fa-lg text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div class="hero-book-overlay">
+                                <span class="hero-book-rank">Best seller #{{ forloop.counter }}</span>
+                                <span class="hero-book-title">{{ book.title|truncatechars:35 }}</span>
+                            </div>
+                        </a>
+                        {% empty %}
+                        {% for i in "123456" %}
+                        <div class="book-item">
+                            <div class="book-cover-thumb d-flex align-items-center justify-content-center" style="background-color: #f0f0f0;">
+                                <i class="fas fa-book fa-lg text-muted"></i>
+                            </div>
+                            <div class="hero-book-overlay">
+                                <span class="hero-book-rank">Sắp cập nhật</span>
+                                <span class="hero-book-title">Đang cập nhật đầu sách</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if categories %}
+<div class="container content-section fade-slide">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="section-title mb-1">Thể loại nổi bật</h2>
+            <p class="section-subtitle mb-0">Lựa chọn nhanh theo thể loại để khám phá sách phù hợp phong cách đọc của bạn.</p>
+        </div>
+        <a href="{% url 'book_list' %}" class="text-decoration-none text-muted">Xem tất cả <i class="fas fa-arrow-right ms-1"></i></a>
+    </div>
+    {# Thể loại: lưới co giãn theo khung trang (CSS .category-chip-row) #}
+    <div class="category-chip-row pb-2 mb-5">
+        {% for category in categories %}
+        <a href="{% url 'book_list' %}?category={{ category.id }}" class="category-chip d-flex align-items-center px-3 py-3 {% if filter_category_id == category.id %}active{% endif %}">
+            {% if category.image %}
+            <img src="{{ category.image.url }}" alt="{{ category.name }}" class="category-thumb me-3 flex-shrink-0">
+            {% else %}
+            <i class="fas fa-bookmark fa-lg me-3 flex-shrink-0"></i>
+            {% endif %}
+            <div class="category-chip-text min-w-0">
+                <div class="fw-semibold text-truncate" title="{{ category.name }}">{{ category.name }}</div>
+                <small class="text-muted">{{ category.books.count }} sách</small>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="container content-section">
+    {% if featured_books %}
+    <div class="fade-slide mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="section-title">Sách nổi bật</h2>
+                <p class="section-subtitle">Những đầu sách được độc giả yêu thích và đánh giá cao trong tháng.</p>
+            </div>
+            <a href="{% url 'book_list' %}" class="text-decoration-none text-muted">Xem tất cả <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            {% for book in featured_books %}
+            <div class="col d-flex">
+                <div class="card book-card shadow-sm overflow-hidden w-100">
+                    {% if book.discount_price %}
+                    <div class="discount-badge">-{{ book.get_discount_percentage }}%</div>
+                    {% endif %}
+                    {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" class="book-cover" alt="{{ book.title }}">
+                    {% else %}
+                    <div class="book-cover d-flex align-items-center justify-content-center" style="background-color: #f0f0f0;">
+                        <i class="fas fa-book fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="book-info d-flex flex-column">
+                        <div>
+                            <div class="book-title" title="{{ book.title }}">{{ book.title }}</div>
+                            <div class="book-author">{{ book.author.name }}</div>
+                            <div class="rating mb-2 d-flex align-items-center flex-wrap gap-1">
+                                {% star_row book.rating size='sm' %}
+                                <span class="text-muted">({{ book.reviews_count }})</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="book-price">
+                                {% if book.discount_price %}
+                                <span class="price-stack">
+                                    <span class="original-price">Giá gốc: {{ book.get_price_vnd|vnd }}</span>
+                                    <span class="sale-price">Giá sale: {{ book.get_discount_price_vnd|vnd }}</span>
+                                </span>
+                                <span class="price-saving">Tiết kiệm {{ book.get_discount_percentage }}%</span>
+                                {% else %}
+                                {{ book.get_price_vnd|vnd }}
+                                {% endif %}
+                            </div>
+                            <div class="book-actions">
+                                <a href="{% url 'book_detail' book.slug %}" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+                                {% if user.is_authenticated %}
+                                <form action="{% url 'add_to_cart' book.id %}" method="post" class="m-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-add">Thêm vào giỏ</button>
+                                </form>
+                                {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-sm btn-add">Đăng nhập để mua</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if best_sellers %}
+    <div class="fade-slide mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="section-title">Bán chạy nhất</h2>
+                <p class="section-subtitle">Những đầu sách người đọc chọn mua nhiều nhất trong tháng.</p>
+            </div>
+            <a href="{% url 'book_list' %}?sort=best" class="text-decoration-none text-muted">Xem thêm <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
+            {% for book in best_sellers %}
+            <div class="col d-flex">
+                <div class="card book-card shadow-sm overflow-hidden w-100">
+                    {% if book.discount_price %}
+                    <div class="discount-badge">-{{ book.get_discount_percentage }}%</div>
+                    {% endif %}
+                    {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" class="book-cover" alt="{{ book.title }}">
+                    {% else %}
+                    <div class="book-cover d-flex align-items-center justify-content-center" style="background-color: #f0f0f0;">
+                        <i class="fas fa-book fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="book-info d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="book-title" title="{{ book.title }}">{{ book.title }}</div>
+                            <div class="book-author">{{ book.author.name }}</div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-end mt-3">
+                            <span class="book-price">{{ book.get_current_price_vnd|vnd }}</span>
+                            <a href="{% url 'book_detail' book.slug %}" class="btn btn-sm btn-outline-secondary">Xem</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if top_rated %}
+    <div class="fade-slide mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="section-title">Đánh giá cao nhất</h2>
+                <p class="section-subtitle">Sách được độc giả đánh giá nhiều sao nhất trong kho sách của chúng tôi.</p>
+            </div>
+            <a href="{% url 'book_list' %}?sort=rating" class="text-decoration-none text-muted">Xem thêm <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
+            {% for book in top_rated %}
+            <div class="col d-flex">
+                <div class="card book-card shadow-sm overflow-hidden w-100">
+                    {% if book.discount_price %}
+                    <div class="discount-badge">-{{ book.get_discount_percentage }}%</div>
+                    {% endif %}
+                    {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" class="book-cover" alt="{{ book.title }}">
+                    {% else %}
+                    <div class="book-cover d-flex align-items-center justify-content-center" style="background-color: #f0f0f0;">
+                        <i class="fas fa-book fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="book-info d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="book-title" title="{{ book.title }}">{{ book.title }}</div>
+                            <div class="rating mb-3 d-flex align-items-center flex-wrap gap-1">
+                                {% star_row book.rating size='sm' %}
+                                <span class="text-muted">({{ book.reviews_count }})</span>
+                            </div>
+                        </div>
+                        <div class="book-actions-aligned">
+                            <span class="book-price">{{ book.get_current_price_vnd|vnd }}</span>
+                            <a href="{% url 'book_detail' book.slug %}" class="btn btn-sm btn-outline-secondary">Xem</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

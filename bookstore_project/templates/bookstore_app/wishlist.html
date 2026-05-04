@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load currency_filters %}
+
+{% block title %}Wishlist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-title">
+        <i class="fas fa-heart"></i> Danh sách yêu thích
+    </h1>
+    
+    {% if books %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for book in books %}
+        <div class="col">
+            <div class="card book-card">
+                {% if book.discount_price %}
+                <div class="discount-badge">-{{ book.get_discount_percentage }}%</div>
+                {% endif %}
+                {% if book.cover_image %}
+                <img src="{{ book.cover_image.url }}" class="book-cover" alt="{{ book.title }}">
+                {% else %}
+                <div class="book-cover d-flex align-items-center justify-content-center" style="background-color: #e9ecef;" role="img" aria-label="{{ book.title }}">
+                    <i class="fas fa-book fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="book-info">
+                    <div class="book-title" title="{{ book.title }}">{{ book.title }}</div>
+                    <div class="book-author">{{ book.author.name }}</div>
+                    <div class="book-price">
+                        {% if book.discount_price %}
+                        <span class="price-stack">
+                            <span class="original-price">Giá gốc: {{ book.get_price_vnd|vnd }}</span>
+                            <span class="sale-price">Giá sale: {{ book.get_discount_price_vnd|vnd }}</span>
+                        </span>
+                        <span class="price-saving">Tiết kiệm {{ book.get_discount_percentage }}%</span>
+                        {% else %}
+                        {{ book.get_price_vnd|vnd }}
+                        {% endif %}
+                    </div>
+                    <div class="mt-3 d-grid gap-2">
+                        <a href="{% url 'book_detail' book.slug %}" class="btn btn-sm btn-primary-custom">
+                            <i class="fas fa-eye"></i> Xem
+                        </a>
+                        <form method="post" action="{% url 'add_to_cart' book.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-sm btn-success w-100">
+                                <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'remove_from_wishlist' book.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger w-100">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-heart"></i> Bạn chưa thêm sách nào vào danh sách yêu thích.
+        <a href="{% url 'book_list' %}" class="alert-link">Khám phá sách ngay</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

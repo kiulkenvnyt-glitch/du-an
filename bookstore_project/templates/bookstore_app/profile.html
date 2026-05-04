@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags currency_filters %}
+
+{% block title %}Hồ sơ cá nhân{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-shell {
+        padding: 48px 0 60px;
+    }
+    .profile-hero {
+        border: none;
+        border-radius: 24px;
+        background: linear-gradient(135deg, #0f2347 0%, #1e3a6d 60%, #254a89 100%);
+        color: #fff;
+        box-shadow: 0 22px 48px rgba(16, 32, 63, 0.22);
+    }
+    .profile-hero .username {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 0.2rem;
+    }
+    .profile-hero .sub {
+        color: rgba(255,255,255,0.82);
+    }
+    .profile-stat {
+        border: none;
+        border-radius: 18px;
+        box-shadow: 0 10px 26px rgba(16, 32, 63, 0.08);
+        height: 100%;
+    }
+    .profile-stat .label {
+        color: #6c7a95;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .profile-stat .value {
+        color: #142b52;
+        font-size: 1.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+    .profile-panel {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 14px 34px rgba(16, 32, 63, 0.09);
+        overflow: hidden;
+    }
+    .profile-panel .panel-head {
+        padding: 1rem 1.25rem;
+        background: #f6f9ff;
+        border-bottom: 1px solid rgba(16, 32, 63, 0.08);
+    }
+    .profile-panel .panel-head h5 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #10203f;
+    }
+    .profile-actions .btn {
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 0.65rem 0.95rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container profile-shell">
+    <div class="card profile-hero mb-4">
+        <div class="card-body p-4 p-md-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+                <div>
+                    <div class="username">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="sub"><i class="fas fa-at me-1"></i>{{ user.username }} &nbsp;•&nbsp; {{ user.email }}</div>
+                    <div class="sub mt-2">Quản lý thông tin tài khoản, theo dõi đơn hàng và cập nhật bảo mật tại một nơi.</div>
+                </div>
+                <div class="profile-actions d-flex flex-wrap gap-2">
+                    <a href="{% url 'order_list' %}" class="btn btn-light">
+                        <i class="fas fa-list me-2"></i>Đơn hàng của tôi
+                    </a>
+                    <a href="{% url 'password_reset' %}" class="btn btn-warning">
+                        <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card profile-stat">
+                <div class="card-body">
+                    <div class="label">Tổng đơn hàng</div>
+                    <div class="value">{{ total_orders|default:0 }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card profile-stat">
+                <div class="card-body">
+                    <div class="label">Tổng chi tiêu</div>
+                    <div class="value">{{ total_spent|vnd }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card profile-stat">
+                <div class="card-body">
+                    <div class="label">Đơn đang xử lý</div>
+                    <div class="value">{{ pending_orders|default:0 }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card profile-stat">
+                <div class="card-body">
+                    <div class="label">Đơn đã giao</div>
+                    <div class="value">{{ delivered_orders|default:0 }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card profile-panel">
+                <div class="panel-head">
+                    <h5><i class="fas fa-id-card me-2"></i>Cập nhật thông tin cá nhân</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Lưu thay đổi
+                            </button>
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-home me-2"></i>Về trang chủ
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card profile-panel mb-4">
+                <div class="panel-head">
+                    <h5><i class="fas fa-key me-2"></i>Đổi mật khẩu</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" action="{% url 'password_change' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="old_password" class="form-label">Mật khẩu cũ</label>
+                            <input type="password" class="form-control" id="old_password" name="old_password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password1" class="form-label">Mật khẩu mới</label>
+                            <input type="password" class="form-control" id="new_password1" name="new_password1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password2" class="form-label">Xác nhận mật khẩu mới</label>
+                            <input type="password" class="form-control" id="new_password2" name="new_password2" required>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">
+                            <i class="fas fa-save me-2"></i>Đổi mật khẩu
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card profile-panel">
+                <div class="panel-head">
+                    <h5><i class="fas fa-shield-alt me-2"></i>Bảo mật tài khoản</h5>
+                </div>
+                <div class="card-body p-3">
+                    <p class="mb-2">Nên đổi mật khẩu định kỳ để tăng an toàn cho tài khoản.</p>
+                    <small class="text-muted">Mẹo: dùng mật khẩu dài, có chữ hoa, chữ thường, số và ký tự đặc biệt.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

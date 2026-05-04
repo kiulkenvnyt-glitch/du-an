@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags currency_filters %}
+
+{% block title %}Thanh toán{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-title">Thanh toán</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Thông tin giao hàng</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.first_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.last_name|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        {{ form.email|as_crispy_field }}
+                        {{ form.phone|as_crispy_field }}
+                        {{ form.address|as_crispy_field }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.city|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.state|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.postal_code|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.country|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        {{ form.notes|as_crispy_field }}
+                        
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-credit-card"></i> Đặt đơn hàng
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Tóm tắt đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Giá hiển thị theo <strong>VNĐ</strong> (đơn đặt hàng vẫn lưu theo hệ thống nội bộ).</p>
+                    {% for item in cart.items.all %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>{{ item.book.title }} × {{ item.quantity }}</span>
+                        <strong>{{ item.get_total_price_vnd|vnd }}</strong>
+                    </div>
+                    {% endfor %}
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between">
+                        <strong>Tổng cộng (VNĐ):</strong>
+                        <strong class="text-danger" style="font-size: 1.3rem;">{{ cart.get_total_price_vnd|vnd }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
